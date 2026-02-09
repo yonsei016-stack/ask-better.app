@@ -15,18 +15,20 @@ st.set_page_config(page_title="Ask better", page_icon="🧠", layout="centered")
 st.title("🧠 Ask better")
 st.caption("사용자의 질문을 더 좋은 질문으로 바꿔주는 AI 도우미")
 
-# --- API 키 로드 (Streamlit secrets 우선, 없으면 환경변수 사용) ---
-api_key = None
-if hasattr(st, "secrets") and "OPENAI_API_KEY" in st.secrets:
-    api_key = st.secrets["OPENAI_API_KEY"]
-else:
-    api_key = os.getenv("OPENAI_API_KEY")
+# --- API 키 입력 ---
+st.subheader("🔑 OpenAI API 키 입력")
+api_key = st.text_input(
+    "OpenAI API 키를 입력하세요",
+    type="password",
+    placeholder="sk-..."
+)
 
 if not api_key:
-    st.warning("OPENAI_API_KEY가 설정되어 있지 않습니다. (Streamlit secrets 또는 환경변수에 설정해주세요.)")
+    st.info("API 키를 입력하면 앱을 사용할 수 있습니다.")
     st.stop()
 
 client = OpenAI(api_key=api_key)
+
 
 # --- 사용자 취향(기능 2) ---
 st.subheader("1) 질문 입력")
