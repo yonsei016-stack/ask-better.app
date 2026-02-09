@@ -16,15 +16,40 @@ st.title("🧠 Ask better")
 st.caption("사용자의 질문을 더 좋은 질문으로 바꿔주는 AI 도우미")
 
 # --- API 키 입력 ---
+import re
+
+# --- API 키 입력 ---
 st.subheader("🔑 OpenAI API 키 입력")
-api_key = st.text_input(
-    "OpenAI API 키를 입력하세요",
+api_key_raw = st.text_input(
+    "OpenAI API 키를 입력하세요 (예: sk-... / sk-proj-...)",
     type="password",
     placeholder="sk-..."
 )
 
-if not api_key:
+if not api_key_raw:
     st.info("API 키를 입력하면 앱을 사용할 수 있습니다.")
+    st.stop()
+
+# 사용자가 'API 키: sk-...' 처럼 앞에 문구를 붙여 넣어도 동작하도록 정리
+api_key_raw = api_key_raw.strip()
+
+# 'Bearer '가 포함된 형태를 붙여 넣은 경우 제거
+if api_key_raw.lower().startswith("bearer "):
+    api_key_raw = api_key_raw.split(" ", 1)[1].strip()
+
+# 입력값에서 실제 키(sk-... 또는 sk-proj-...)만 추출
+m = re.search(r"(sk-[A-Za-z0-9_\-]+)", api_key_raw)
+if not m:
+    st.error("올바른 OpenAI API 키 형식이 아닙니다. 'sk-'로 시작하는 키만 입력해 주세요.")
+    st.stop()
+
+api_key = m.group(1)
+
+# 헤더는 ASCII여야 하므로 최종 검증 (비ASCII 포함 시 차단)
+try:
+    api_key.encode("ascii")
+except UnicodeEncodeError:
+    st.error("API 키에 허용되지 않는 문자가 포함되어 있습니다. 'sk-...' 형태의 키만 입력해 주세요.")
     st.stop()
 
 client = OpenAI(api_key=api_key)
